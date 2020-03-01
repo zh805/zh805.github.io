@@ -27,10 +27,10 @@
 <meta property="og:site_name" content="Sevenhzhang的博客">
 <meta property="og:description" content="二叉树遍历 二叉树结构 12345struct BiTree&amp;#123;	int	data;	BiTree* lchild;	BiTree* rchild;&amp;#125;;  先序遍历 123456789101112131415161718192021222324252627void PreOrder(BiTree* root)&amp;#123;	if(root &#x3D;&#x3D; NULL)		return;	cou">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-03-01T13:55:20.522Z">
-<meta property="article:modified_time" content="2020-03-01T13:55:30.717Z">
+<meta property="article:published_time" content="2020-03-01T15:13:00.000Z">
+<meta property="article:modified_time" content="2020-03-01T15:15:07.697Z">
 <meta property="article:author" content="Sevenhzhang">
-<meta property="article:tag" content="Python">
+<meta property="article:tag" content="二叉树">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/">
@@ -194,7 +194,16 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-03-01 21:55:20 / 修改时间：21:55:30" itemprop="dateCreated datePublished" datetime="2020-03-01T21:55:20+08:00">2020-03-01</time>
+              <time title="创建时间：2020-03-01 23:13:00 / 修改时间：23:15:07" itemprop="dateCreated datePublished" datetime="2020-03-01T23:13:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
             </span>
 
           
@@ -214,6 +223,7 @@
 
 <p>先序遍历</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(root == <span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt; root-&gt;data &lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	PreOrder(root -&gt; lchild);</span><br><span class="line">	PreOrder(root -&gt; right);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment">二叉树的非递归前序遍历，前序遍历思想：先让根进栈，只要栈不为空，就可以做弹出操作， </span></span><br><span class="line"><span class="comment">每次弹出一个结点，记得把它的左右结点都进栈，记得右子树先进栈，这样可以保证右子树在栈中总处于左子树的下面。 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder_Nonrecursive</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!root)</span><br><span class="line">		<span class="keyword">return</span> ;</span><br><span class="line">	<span class="built_in">stack</span>&lt;BiTree&gt; s;</span><br><span class="line">	s.push(root);</span><br><span class="line">	<span class="keyword">while</span>(!s.empty())&#123;</span><br><span class="line">		BiTree* temp = s.top();</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; temp-&gt;data &lt;&lt;<span class="string">" "</span>;</span><br><span class="line">		s.pop();</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;rchild)</span><br><span class="line">			s.push(temp-&gt;rchild);</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;lchild)</span><br><span class="line">			s.push(temp-&gt;lchild);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
 
 <p>中序遍历</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">InOrder</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(root == <span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span> ;</span><br><span class="line">	InOrder(root-&gt;lchild);</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;root-&gt;data&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	InOrder(root-&gt;rchild);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">InOrder_Nonrecursive</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!root)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	BiTree* curr = root;</span><br><span class="line">	<span class="built_in">stack</span>&lt;BrTree*&gt; s;</span><br><span class="line">	<span class="keyword">while</span>(curr != <span class="literal">NULL</span> || !s.empty())&#123;</span><br><span class="line">		<span class="keyword">while</span>(curr != <span class="literal">NULL</span>)&#123;<span class="comment">//到最左下</span></span><br><span class="line">			s.push(curr);</span><br><span class="line">			curr=curr-&gt;lchild;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(!s.empty())&#123;</span><br><span class="line">			curr = s.top();</span><br><span class="line">			s.pop();<span class="comment">//栈顶出栈</span></span><br><span class="line">			<span class="built_in">cout</span> &lt;&lt; curr-&gt;data &lt;&lt;<span class="string">" "</span>;</span><br><span class="line">			curr=curr-&gt;rchild;	</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -229,6 +239,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" rel="tag"># 二叉树</a>
+          </div>
 
         
 
@@ -239,10 +252,7 @@
     <a href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/" rel="prev" title="二叉树的应用">
       <i class="fa fa-chevron-left"></i> 二叉树的应用
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/03/01/%E9%93%BE%E8%A1%A8/" rel="next" title="链表">
-      链表 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -330,7 +340,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
