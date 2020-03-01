@@ -168,6 +168,115 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8FC++/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8FC++/" class="post-title-link" itemprop="url">单例模式C++</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:06:00 / 修改时间：23:07:35" itemprop="dateCreated datePublished" datetime="2020-03-01T23:06:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>保证类只有一个实例，并提供一个访问它的全局访问点，该实例被所有程序模块共享</p>
+<p>单例模式的<strong>要点</strong>有三个：</p>
+<ol>
+<li>单例类只能有一个实例</li>
+<li>必须自行创建这个实例 </li>
+<li>必须自行向整个系统提供这个实例</li>
+</ol>
+<p><strong>注意点</strong></p>
+<ol>
+<li><strong>实例控制</strong>:  单例模式会阻止其他对象实例化自己的单例对象的副本,从而确保所有对象都访问唯一实例</li>
+<li><strong>灵活性</strong>: 因为类控制实例化过程,所以类可以灵活更改实例化过程</li>
+<li><strong>开销</strong>: 虽然数量很少,但如果每次对象请求引用时都要检查是否存在类的实例,将仍然需要一些开销,这个问题可以通过静态初始化解决此问题。定义一个私有的静态指针instance,和一个公有的静态函数 GetInstance()。</li>
+</ol>
+<p><strong>优点:</strong></p>
+<ol>
+<li>在内存中只有一个对象,节省内存空间</li>
+<li>避免频繁的创建销毁对象,可以提高性能</li>
+<li>避免对共享资源的多重占用</li>
+<li>可以全局访问</li>
+</ol>
+<p><strong>适用场景:</strong></p>
+<ol>
+<li>需要频繁实例化然后销毁的对象</li>
+<li>创建对象耗时过多或者耗资源过多,但又经常用到的对象</li>
+<li>有状态的工具类对象</li>
+<li>频繁访问数据库或文件的对象</li>
+<li>以及其他要求只有一个对象的场景<h3 id="懒汉"><a href="#懒汉" class="headerlink" title="懒汉"></a>懒汉</h3>故名思义，不到万不得已就不会去实例化类，也就是说在第一次用到类实例的时候才会去实例化</li>
+</ol>
+<p>在访问量较小时，采用懒汉实现。这是以<strong>时间换空间</strong>。</p>
+<p><strong>经典懒汉</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="keyword">private</span>：</span><br><span class="line">		Singleton()&#123;&#125;;</span><br><span class="line">		Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;<span class="comment">//禁止拷贝</span></span><br><span class="line">		Singleton&amp; <span class="keyword">operator</span> = (<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;<span class="comment">//禁止赋值</span></span><br><span class="line">		</span><br><span class="line">		<span class="keyword">static</span> Singleton* instance;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//初始化</span></span><br><span class="line">Singleton* Singleton::instance = <span class="literal">NULL</span>;</span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)&#123;</span><br><span class="line">		instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>懒汉模式下，在定义instance变量时先等于NULL，在调用GetInstance()方法时，再判断是否要赋值。这种模式，并非是线程安全的，因为多个线程同时调用GetInstance()方法，就可能导致有产生多个实例。要实现线程安全，就必须加锁。</p>
+<p><strong>加锁懒汉</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Singleton()&#123;</span><br><span class="line">		pthread_mutex_init(&amp;mutex);	</span><br><span class="line">	&#125;;</span><br><span class="line">    Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">    Singleton&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">    <span class="keyword">static</span> Singleton* instance;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">pthread_mutex_t</span> mutex;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_mutex_t</span> Singleton::mutex;</span><br><span class="line">Singleton* Singleton::instance = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)&#123;</span><br><span class="line">  		pthread_mutex_lock(&amp;mutex);</span><br><span class="line">  		<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)</span><br><span class="line">  			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">  		pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">  	&#125;</span><br><span class="line">  	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="饿汉"><a href="#饿汉" class="headerlink" title="饿汉"></a>饿汉</h3><p>线程安全：还未使用变量时，已经对instance进行赋值，就像很饥饿的感觉。在多线程环境下肯定是线程安全的，因为不存在多线程实例化的问题。 </p>
+<p>饿了肯定要饥不择食，所以在单例类<strong>定义的时候就进行实例化</strong>。</p>
+<p>由于要进行线程同步，所以在访问量比较大，或者可能访问的线程比较多时，采用饿汉实现，可以实现更好的性能。这是以空间换时间。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">	    Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">        Singleton&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">		Singleton()&#123;&#125;;</span><br><span class="line">		<span class="keyword">static</span> Singleton* instance;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Singleton* Singleton::instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1033,107 +1142,6 @@
 <p>像Serializable这样的级别，就是以锁表的方式(类似于Java多线程中的锁)使得其他的线程只能在锁外等待，所以平时选用何种隔离级别应该根据实际情况。</p>
 <p>在<strong>MySQL</strong>数据库中默认的隔离级别为<strong>Repeatable read (可重复读)</strong>。</p>
 <p><strong>Oracle</strong>数据库中，只支持 <strong>Serializable (串行化)</strong> 级别和 <strong>Read committed (读已提交)</strong> 这两种级别，其中默认的为Read committed级别。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8FC++/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8FC++/" class="post-title-link" itemprop="url">单例模式C++</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 21:52:40 / 修改时间：21:52:51" itemprop="dateCreated datePublished" datetime="2020-03-01T21:52:40+08:00">2020-03-01</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>@[TOC]</p>
-<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>保证类只有一个实例，并提供一个访问它的全局访问点，该实例被所有程序模块共享</p>
-<p>单例模式的<strong>要点</strong>有三个：</p>
-<ol>
-<li>单例类只能有一个实例</li>
-<li>必须自行创建这个实例 </li>
-<li>必须自行向整个系统提供这个实例</li>
-</ol>
-<p><strong>注意点</strong></p>
-<ol>
-<li><strong>实例控制</strong>:  单例模式会阻止其他对象实例化自己的单例对象的副本,从而确保所有对象都访问唯一实例</li>
-<li><strong>灵活性</strong>: 因为类控制实例化过程,所以类可以灵活更改实例化过程</li>
-<li><strong>开销</strong>: 虽然数量很少,但如果每次对象请求引用时都要检查是否存在类的实例,将仍然需要一些开销,这个问题可以通过静态初始化解决此问题。定义一个私有的静态指针instance,和一个公有的静态函数 GetInstance()。</li>
-</ol>
-<p><strong>优点:</strong></p>
-<ol>
-<li>在内存中只有一个对象,节省内存空间</li>
-<li>避免频繁的创建销毁对象,可以提高性能</li>
-<li>避免对共享资源的多重占用</li>
-<li>可以全局访问</li>
-</ol>
-<p><strong>适用场景:</strong></p>
-<ol>
-<li>需要频繁实例化然后销毁的对象</li>
-<li>创建对象耗时过多或者耗资源过多,但又经常用到的对象</li>
-<li>有状态的工具类对象</li>
-<li>频繁访问数据库或文件的对象</li>
-<li>以及其他要求只有一个对象的场景<h3 id="懒汉"><a href="#懒汉" class="headerlink" title="懒汉"></a>懒汉</h3>故名思义，不到万不得已就不会去实例化类，也就是说在第一次用到类实例的时候才会去实例化</li>
-</ol>
-<p>在访问量较小时，采用懒汉实现。这是以<strong>时间换空间</strong>。</p>
-<p><strong>经典懒汉</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="keyword">private</span>：</span><br><span class="line">		Singleton()&#123;&#125;;</span><br><span class="line">		Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;<span class="comment">//禁止拷贝</span></span><br><span class="line">		Singleton&amp; <span class="keyword">operator</span> = (<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;<span class="comment">//禁止赋值</span></span><br><span class="line">		</span><br><span class="line">		<span class="keyword">static</span> Singleton* instance;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//初始化</span></span><br><span class="line">Singleton* Singleton::instance = <span class="literal">NULL</span>;</span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)&#123;</span><br><span class="line">		instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>懒汉模式下，在定义instance变量时先等于NULL，在调用GetInstance()方法时，再判断是否要赋值。这种模式，并非是线程安全的，因为多个线程同时调用GetInstance()方法，就可能导致有产生多个实例。要实现线程安全，就必须加锁。</p>
-<p><strong>加锁懒汉</strong></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Singleton()&#123;</span><br><span class="line">		pthread_mutex_init(&amp;mutex);	</span><br><span class="line">	&#125;;</span><br><span class="line">    Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">    Singleton&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">    <span class="keyword">static</span> Singleton* instance;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">pthread_mutex_t</span> mutex;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_mutex_t</span> Singleton::mutex;</span><br><span class="line">Singleton* Singleton::instance = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)&#123;</span><br><span class="line">  		pthread_mutex_lock(&amp;mutex);</span><br><span class="line">  		<span class="keyword">if</span>(instance == <span class="literal">NULL</span>)</span><br><span class="line">  			instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">  		pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">  	&#125;</span><br><span class="line">  	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="饿汉"><a href="#饿汉" class="headerlink" title="饿汉"></a>饿汉</h3><p>线程安全：还未使用变量时，已经对instance进行赋值，就像很饥饿的感觉。在多线程环境下肯定是线程安全的，因为不存在多线程实例化的问题。 </p>
-<p>饿了肯定要饥不择食，所以在单例类<strong>定义的时候就进行实例化</strong>。</p>
-<p>由于要进行线程同步，所以在访问量比较大，或者可能访问的线程比较多时，采用饿汉实现，可以实现更好的性能。这是以空间换时间。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">static</span> Singleton* <span class="title">GetInstance</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">	    Singleton(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">        Singleton&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> Singleton&amp;)&#123;&#125;;</span><br><span class="line">		Singleton()&#123;&#125;;</span><br><span class="line">		<span class="keyword">static</span> Singleton* instance;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Singleton* Singleton::instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"><span class="function">Singleton* <span class="title">Singleton::GetInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
 
       
     </div>
