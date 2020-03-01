@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zh805.github.io","root":"/","scheme":"Muse","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="@[TOC] 分治对于海量数据，无法一次性装进内存处理，通过hash映射分割成相应的小块数据，然后对各个小块数据操作 例 1  ：a、b文件中相同的 url给定a、b两个文件，各存放50亿个 url , 每个 url 各占64字节，内存限制是 4GB ,找出a、b文件中相同的 url  ？5*64&#x3D;320GB 方法1：  遍历a,对每个url求取hash（url）%1024 , 1024个小文件，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="海量数据处理">
+<meta property="og:url" content="http://zh805.github.io/2020/03/01/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">
+<meta property="og:site_name" content="Sevenhzhang的博客">
+<meta property="og:description" content="@[TOC] 分治对于海量数据，无法一次性装进内存处理，通过hash映射分割成相应的小块数据，然后对各个小块数据操作 例 1  ：a、b文件中相同的 url给定a、b两个文件，各存放50亿个 url , 每个 url 各占64字节，内存限制是 4GB ,找出a、b文件中相同的 url  ？5*64&#x3D;320GB 方法1：  遍历a,对每个url求取hash（url）%1024 , 1024个小文件，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2018111409560760.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181114100341821.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181114100348925.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181114100406194.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181114101533551.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20181114101951889.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2018111410201579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-03-01T13:56:14.752Z">
+<meta property="article:modified_time" content="2020-03-01T13:56:24.415Z">
+<meta property="article:author" content="Sevenhzhang">
+<meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/2018111409560760.png">
+
+<link rel="canonical" href="http://zh805.github.io/2020/03/01/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>海量数据处理 | Sevenhzhang的博客</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+	  hm.src = "https://hm.baidu.com/hm.js?7f150fcc1d3e02f2ae0952b5a7140fda";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Sevenhzhang的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Make Progress</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          海量数据处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 21:56:14 / 修改时间：21:56:24" itemprop="dateCreated datePublished" datetime="2020-03-01T21:56:14+08:00">2020-03-01</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>@[TOC]</p>
+<h2 id="分治"><a href="#分治" class="headerlink" title="分治"></a>分治</h2><p>对于海量数据，无法一次性装进内存处理，通过hash映射分割成相应的小块数据，然后对各个小块数据操作</p>
+<h4 id="例-1-：a、b文件中相同的-url"><a href="#例-1-：a、b文件中相同的-url" class="headerlink" title="例 1  ：a、b文件中相同的 url"></a>例 1  ：a、b文件中相同的 url</h4><p><strong>给定a、b两个文件，各存放50亿个 url , 每个 url 各占64字节，内存限制是 4GB ,找出a、b文件中相同的 url  ？</strong><br>5*64=320GB</p>
+<p><strong>方法1：</strong></p>
+<ol>
+<li>遍历a,对每个url求取hash（url）%1024 , 1024个小文件，每个大约300MB;</li>
+<li>遍历b,1024</li>
+<li>处理后，相同的url都在对应的小文件，（a0vsb0,a1vsb1……a1024vsb1024）,不对应的小文件不可能有相同的url处理后，相同的url都在对应的小文件</li>
+<li>a存入hasf_set,遍历b</li>
+</ol>
+<p><strong>方法2：</strong><br>如果允许有一定的错误率，可以使用Bloom filter，4G内存大概可以表示340亿bit。将其中一个文件中的 url 使用Bloom filter映射为这340亿bit，然后挨个读取另外一个文件的url，检查是否与Bloom filter，如果是，那么该url应该是共同的 url （注意会有一定的错误率）</p>
+<h4 id="例-2-：访问最多的IP"><a href="#例-2-：访问最多的IP" class="headerlink" title="例 2 ：访问最多的IP"></a>例 2 ：访问最多的IP</h4><p><strong>海量日志数据，提取出某日访问百度次数最多的那个IP</strong><br><strong>方法：</strong><br>百度作为国内第一大搜索引擎，每天访问它的IP数量巨大，如果想一次性把所有IP数据装进内存处理，则内存容量明显不够，故针对数据太大，内存受限的情况，可以把大文转化成（取模映射）小文件，从而大而化小，逐个处理</p>
+<ol>
+<li><p>分而治之/hash映射<br>首先把这一天访问百度日志的所有IP提取出来，然后逐个写入到一个大文件中，接着采用映射的方法，比如%1000，把整个大文件映射为1000个小文件。</p>
+</li>
+<li><p>hash_map统计<br>当大文件转化成了小文件，那么我们便可以采用 hash_map(ip, value) 来分别对1000个小文件中的IP进行频率统计，再找出每个小文件中出现频率最大的IP。</p>
+</li>
+<li><p>堆/快速排序<br>统计出1000个频率最大的IP后，依据各自频率的大小进行排序(可采取堆排序)，找出那个频率最大的IP，即为所求。</p>
+</li>
+</ol>
+<h4 id="例-3-：Top-K-问题"><a href="#例-3-：Top-K-问题" class="headerlink" title="例 3 ：Top K 问题"></a>例 3 ：Top K 问题</h4><p> <strong>有一个1G大小的一个文件，里面每一行是一个词，词的大小不超过16字节，内存限制大小是1M。返回频数最高的100个词</strong></p>
+<p><strong>方法：</strong></p>
+<ol>
+<li><p>分而治之/hash映射<br>顺序读取文件，对于每个词x，取hash(x)%5000，然后把该值存到5000个小文件（记为x0,x1,…x4999）中，每个文件大概是200k。如果其中有的小文件超过了1M大小，按照类似的方法继续往下分，直到分解得到的小文件的大小都不超过1M。</p>
+</li>
+<li><p>hash_map统计<br>对每个小文件，采用trie树/hash_map等统计每个文件中出现的词以及相应的频率。</p>
+</li>
+<li><p>堆/归并排序<br>取出出现频率最大的100个词（可以用含100个结点的最小堆）后，再把100个词及相应的频率存入文件，这样又得到了5000个文件。最后把这5000个文件进行归并（类似于归并排序）。</p>
+</li>
+</ol>
+<h2 id="Bit-map"><a href="#Bit-map" class="headerlink" title="Bit-map"></a>Bit-map</h2><p>使用位数组来表示某些元素是否存在</p>
+<p>由于采用了Bit为单位来存储数据，因此在存储空间方面，可以大大节省，故适用于海量数据的<strong>快速查找、判重、删除</strong></p>
+<p><strong>示例：</strong><br>对0-7内的5个元素(4,7,2,5,3)排序（假设元素没有重复），相应位置 1 </p>
+<p>遍历一遍Bit区域，将该位是一的位的编号输出（2，3，4，5，7），就达到了排序的目的</p>
+<p><img src="https://img-blog.csdnimg.cn/2018111409560760.png" alt="在这里插入图片描述"></p>
+<h4 id="例-1：不重复的整数"><a href="#例-1：不重复的整数" class="headerlink" title="例 1：不重复的整数"></a>例 1：不重复的整数</h4><p><strong>在2.5亿个整数中找出不重复的整数（内存不足以容纳这2.5亿个整数）</strong></p>
+<p><strong>解法一：</strong></p>
+<p>采用2-Bitmap（每个数分配2bit，00表示不存在，01表示出现一次，10表示多次，11无意义）进行，共需内存2^32 * 2 bit=1 GB内存（因为整数最多有2^32个）。然后扫描这2.5亿个整数，查看Bitmap中相对应位，如果是00变01，01变10，10保持不变。所描完事后，查看bitmap，把对应位是01的整数输出即可。</p>
+<p><strong>解法二：</strong><br>进行划分小文件的方法。然后在小文件中找出不重复的整数，并排序。然后再进行归并，注意去除重复的元素。”</p>
+<h4 id="例-2-：快速判断"><a href="#例-2-：快速判断" class="headerlink" title="例 2 ：快速判断"></a>例 2 ：快速判断</h4><p><strong>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</strong></p>
+<p><strong>方法：</strong><br>申请 2^32 = 512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
+<h2 id="Bloom-Filter"><a href="#Bloom-Filter" class="headerlink" title="Bloom Filter"></a>Bloom Filter</h2><p>如果想判断一个元素是不是在一个集合里，一般是将集合中所有元素保存起来，然后通过比较确定。应用链表、树、哈希表 等数据结构</p>
+<p>但是随着集合中元素的增加，需要的存储空间越来越大、同时检索速度也越来越慢<br>以上三种时间复杂度分别为 <strong>O(n),O(log n),O(n/k)</strong></p>
+<p>Bit-map 的升级版<br>适用于需要<strong>进一步节省内存、但可允许一定错误率</strong>的情况</p>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>当一个元素被加入集合时，通过K个散列函数将这个元素映射成一个位数组中的K个点，把它们置为1。</p>
+<p>检索时，只要看这些点是不是都是1就（大约）知道集合中有没有它：如果这些点有任何一个0，则被检元素一定不在；如果都是1，则被检元素很可能在。</p>
+<p>初始状态时，Bloom Filter 是一个包含m位的位数组，每一位都置为0。<br><img src="https://img-blog.csdnimg.cn/20181114100341821.png" alt="在这里插入图片描述"></p>
+<p>为了表达 S = { x1, x2,…,xn } 这样一个n个元素的集合，Bloom Filter使用k个相互独立的哈希函数，分别将集合中的每个元素映射到{1,…,m}的范围中。对任意一个元素x，第i个哈希函数映射的位置hi(x)就会被置为1（1≤i≤k）。</p>
+<p><img src="https://img-blog.csdnimg.cn/20181114100348925.png" alt="在这里插入图片描述"></p>
+<p>在判断y是否属于这个集合时，我们对y应用k次哈希函数，如果所有hi(y)的位置都是1（1≤i≤k），那么我们就认为y是集合中的元素，否则就认为y不是集合中的元素。</p>
+<p>下图中 y1 就不是集合中的元素（因为y1有一处指向了“0”位）。<br>y2属于这个集合，或者刚好是一个false positive。</p>
+<p><img src="https://img-blog.csdnimg.cn/20181114100406194.png" alt="在这里插入图片描述"></p>
+<h2 id="Trie-（字典）树"><a href="#Trie-（字典）树" class="headerlink" title="Trie （字典）树"></a>Trie （字典）树</h2><p><strong>典型应用：</strong> 统计和排序大量的字符串，搜索引擎系统用于文本词频统计，代码补全，统计具有相同首部的字符串</p>
+<p><strong>优点：</strong> 最大限度地减少无谓的字符串比较，查询效率比较高。</p>
+<p><strong>核心思想：</strong> 空间换时间，利用字符串的公共前缀来降低查询时间的开销以达到提高效率的目的。</p>
+<p><strong>三个基本性质：</strong></p>
+<ol>
+<li>根节点不包含字符，除根节点外每一个节点都只包含一个字符。</li>
+<li>从根节点到某一节点，路径上经过的字符连接起来，为该节点对应的字符串。</li>
+<li>每个节点的所有子节点包含的字符都不相同。</li>
+</ol>
+<h4 id="例-1-：单词查询判断"><a href="#例-1-：单词查询判断" class="headerlink" title="例 1 ：单词查询判断"></a>例 1 ：单词查询判断</h4><p><strong>假如现在给你10万个长度不超过10的单词，对于每一个单词，我们要判断它出没出现过，如果出现了，求第一次出现在第几个位置。</strong></p>
+<p><strong>方法：</strong><br>假设要查询的单词是abcd，只要找以a开头的单词中是否存在abcd就可以了，同样的，在以a开头中的单词中，只考虑以b作为第二个字母的单词</p>
+<p>即如果有b，abc，abd，bcd，abcd，efg，hii 6个单词，可以构建一棵树：</p>
+<p><img src="https://img-blog.csdnimg.cn/20181114101533551.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>对于每一个节点，从根遍历到他的过程就是一个单词，如果这个节点被标记为红色，就表示这个单词存在，否则不存在。<br>对于一个单词，只要顺着从根走到对应的节点，再看这个节点是否被标记为红色就可以知道它是否出现过了。把这个节点标记为红色，就相当于插入了这个单词。</p>
+<p>这样一来我们查询和插入可以一起完成，所用时间仅仅为单词长度（在这个例子中，便是10）。这就是一棵trie树。<br>可以看到，trie树每一层的节点数是26^i级别的。所以为了节省空间，我们还可以用动态链表，或者用数组来模拟动态。而空间的花费，不会超过单词数×单词长度。</p>
+<h4 id="例-2-：最频繁出现的前10个词"><a href="#例-2-：最频繁出现的前10个词" class="headerlink" title="例 2 ：最频繁出现的前10个词"></a>例 2 ：最频繁出现的前10个词</h4><p><strong>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析</strong></p>
+<p><strong>方法</strong></p>
+<p>用trie树统计每个词出现的次数，时间复杂度是O(n*len)（len表示单词的平均长度），然后是找出出现最频繁的前10个词。当然，也可以用堆来实现，时间复杂度是O(nlg10)。所以总的时间复杂度，是O(nle)与O(nlg10)中较大的哪一个。</p>
+<h2 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h2><h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><p>倒排索引是一种索引方法，被用来存储在全文搜索下某个单词在一个文档或者一组文档中的存储位置的映射，常被应用于搜索引擎、关键字查询、学术论文的关键字搜索的问题中。</p>
+<p><strong>要被索引的文本</strong><br><img src="https://img-blog.csdnimg.cn/20181114101951889.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>要被索引的文本</strong><br><img src="https://img-blog.csdnimg.cn/2018111410201579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p>正向索引用来存储每个文档的单词的列表。正向索引的查询往往满足每个文档有序频繁的全文查询和每个单词在校验文档中的验证这样的查询。在正向索引中，文档占据了中心的位置，每个文档指向了一个它所包含的索引项的序列。</p>
+<p>也就是说正向索引文档指向了<strong>它包含的那些单词</strong>，而反向索引则是<strong>单词指向了包含它的文档</strong>。</p>
+<h2 id="外排序"><a href="#外排序" class="headerlink" title="外排序"></a>外排序</h2><h4 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h4><p>顾名思义，即在内存外面的排序，因为当要处理的数据量很大，而不能一次装入内存时，此时只能放在读写较慢的外存储器（硬盘）上。</p>
+<p>外排序通常采用的是一种“排序-归并”的策略。</p>
+<ol>
+<li><p>在排序阶段，先读入能放在内存中的数据量，将其排序输出到一个临时文件，依次进行，将待排序数据组织为多个有序的临时文件；</p>
+</li>
+<li><p>尔后在归并阶段将这些临时文件组合为一个大的有序文件，也即排序结果。</p>
+</li>
+</ol>
+<h4 id="例1-：给10-7个数据量的磁盘文件排序"><a href="#例1-：给10-7个数据量的磁盘文件排序" class="headerlink" title="例1 ：给10^7个数据量的磁盘文件排序"></a>例1 ：给10^7个数据量的磁盘文件排序</h4><p><strong>输入：给定一个文件，里面最多含有n个不重复的正整数（也就是说可能含有少于n个不重复正整数），且其中每个数都小于等于n，n=10^7。<br> 输出：得到按从小到大升序排列的包含所有输入的整数的列表。<br> 条件：最多有大约1MB的内存空间可用，但磁盘空间足够。且要求运行时间在5分钟以下，10秒为最佳结果。</strong></p>
+<p><strong>分析</strong></p>
+<ol>
+<li>输入数据限制在相对较小的范围内，</li>
+<li>数据没有重复，</li>
+<li>其中的每条记录都是单一的整数，没有任何其它与之关联的数据。</li>
+</ol>
+<p><strong>方法1：位图</strong></p>
+<p>第一次，只处理1—4999999之间的数据，这些数都是小于5000000的，对这些数进行位图排序，只需要约5000000/8=625000Byte，也就是0.625M，排序后输出。</p>
+<p>第二次，扫描输入文件时，只处理4999999-10000000的数据项，也只需要0.625M（可以使用第一次处理申请的内存）。<br>用此位图方法，严格说来还是不太行，空间消耗10^7 / 8 还是大于1M（1M=1024*1024空间，小于10^7/8）。</p>
+<p>用位图方案的话，需要约1.25MB（若每条记录是8位的正整数的话，则10000000/(1024<em>1024</em>8) ~= 1.2M）的空间，</p>
+<p><strong>方法2：多路归并</strong></p>
+<ol>
+<li><p>内部排序<br>可用内存为1MB，每次对250K的数据进行排序，然后将有序的数写入硬盘。10M的数据需要循环40次，最终产生40个有序的文件。</p>
+</li>
+<li><p>归并排序（可使用败者树 ）<br>将每个文件最开始的数读入，存放在大小为40的 数组中；<br>选择数组中最小的数 min_data，及其对应的文件索引index；<br>将数组中最小的数写入文件result，然后更新数组 (根据index读取该文件下一个数代替min_data)；</p>
+</li>
+</ol>
+<p><strong>败者树</strong><br> log(n)的时间内找到最值</p>
+<p>算法的步骤是：每次从k个组中的首元素中选一个最小的数，加入到新组，这样每次都要比较k-1次，故<br>算法复杂度为O((n-1)<em>(k-1))，而如果使用败者树，可以在O(logk)的复杂度下得到最小的数，算法复杂<br>度将为O((n-1)</em>logk)， 对于外部排序这种数据量超大的排序来说，这是一个不小的提高。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/01/%E9%93%BE%E8%A1%A8/" rel="prev" title="链表">
+      <i class="fa fa-chevron-left"></i> 链表
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#分治"><span class="nav-number">1.</span> <span class="nav-text">分治</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例-1-：a、b文件中相同的-url"><span class="nav-number">1.0.1.</span> <span class="nav-text">例 1  ：a、b文件中相同的 url</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例-2-：访问最多的IP"><span class="nav-number">1.0.2.</span> <span class="nav-text">例 2 ：访问最多的IP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例-3-：Top-K-问题"><span class="nav-number">1.0.3.</span> <span class="nav-text">例 3 ：Top K 问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bit-map"><span class="nav-number">2.</span> <span class="nav-text">Bit-map</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例-1：不重复的整数"><span class="nav-number">2.0.1.</span> <span class="nav-text">例 1：不重复的整数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例-2-：快速判断"><span class="nav-number">2.0.2.</span> <span class="nav-text">例 2 ：快速判断</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bloom-Filter"><span class="nav-number">3.</span> <span class="nav-text">Bloom Filter</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原理"><span class="nav-number">3.0.1.</span> <span class="nav-text">原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trie-（字典）树"><span class="nav-number">4.</span> <span class="nav-text">Trie （字典）树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例-1-：单词查询判断"><span class="nav-number">4.0.1.</span> <span class="nav-text">例 1 ：单词查询判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例-2-：最频繁出现的前10个词"><span class="nav-number">4.0.2.</span> <span class="nav-text">例 2 ：最频繁出现的前10个词</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#倒排索引"><span class="nav-number">5.</span> <span class="nav-text">倒排索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原理-1"><span class="nav-number">5.0.1.</span> <span class="nav-text">原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#外排序"><span class="nav-number">6.</span> <span class="nav-text">外排序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原理-2"><span class="nav-number">6.0.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例1-：给10-7个数据量的磁盘文件排序"><span class="nav-number">6.0.2.</span> <span class="nav-text">例1 ：给10^7个数据量的磁盘文件排序</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sevenhzhang"
+      src="/images/tencent.jpg">
+  <p class="site-author-name" itemprop="name">Sevenhzhang</p>
+  <div class="site-description" itemprop="description">九层之台，起于累土</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zh805" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zh805" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:771662863@qq.com" title="E-Mail → mailto:771662863@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_39554266" title="csdn → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_39554266" rel="noopener" target="_blank"><i class="fa fa-fw fa-crosshairs"></i>csdn</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sevenhzhang</span>
+</div><script color="0,0,255" opacity="0.5" zIndex="-1" count="99" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      script.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>
