@@ -211,16 +211,16 @@
         <h4 id="端口占用"><a href="#端口占用" class="headerlink" title="端口占用"></a>端口占用</h4><ol>
 <li>查看哪个进程占用了8000端口</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">netstat -ano | findstr 8000<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -ano | findstr 8000</span><br></pre></td></tr></table></figure>
 
 <ol start="2">
 <li>查看对用pid的进程详细信息</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">tasklist | findstr xxxx<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tasklist | findstr xxxx</span><br></pre></td></tr></table></figure>
 <ol start="3">
 <li>杀掉xxx进程</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">taskkill /pid xxxx /F<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">taskkill /pid xxxx /F</span><br></pre></td></tr></table></figure>
 
 
 
