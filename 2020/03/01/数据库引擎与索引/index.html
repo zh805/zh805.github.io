@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zh805.github.io","root":"/","scheme":"Muse","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"flat"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="数据库引擎MyISAM： 不支持事务，但是每次查询都是原子的； 支持表级锁，即每次操作是对整个表加锁； 存储表的总行数； 一个MYISAM表有三个文件：索引文件、表结构文件、数据文件； 采用非聚簇索引，索引文件的数据域存储指向数据文件的指针。辅索引与主索引基本一致，但是辅索引不用保证唯一性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库引擎与索引">
+<meta property="og:url" content="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/">
+<meta property="og:site_name" content="Sevenhzhang的博客">
+<meta property="og:description" content="数据库引擎MyISAM： 不支持事务，但是每次查询都是原子的； 支持表级锁，即每次操作是对整个表加锁； 存储表的总行数； 一个MYISAM表有三个文件：索引文件、表结构文件、数据文件； 采用非聚簇索引，索引文件的数据域存储指向数据文件的指针。辅索引与主索引基本一致，但是辅索引不用保证唯一性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-01T15:33:00.000Z">
+<meta property="article:modified_time" content="2020-03-01T15:34:21.713Z">
+<meta property="article:author" content="Sevenhzhang">
+<meta property="article:tag" content="索引">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>数据库引擎与索引 | Sevenhzhang的博客</title>
+  
+
+
+  <script pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+	  hm.src = "https://hm.baidu.com/hm.js?7f150fcc1d3e02f2ae0952b5a7140fda";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Sevenhzhang的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Make Progress</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库引擎与索引
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:33:00 / 修改时间：23:34:21" itemprop="dateCreated datePublished" datetime="2020-03-01T23:33:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="数据库引擎"><a href="#数据库引擎" class="headerlink" title="数据库引擎"></a>数据库引擎</h3><h4 id="MyISAM："><a href="#MyISAM：" class="headerlink" title="MyISAM："></a>MyISAM：</h4><ul>
+<li>不支持事务，但是每次查询都是原子的；</li>
+<li>支持表级锁，即每次操作是对整个表加锁；</li>
+<li>存储表的总行数；</li>
+<li>一个MYISAM表有三个文件：索引文件、表结构文件、数据文件；</li>
+<li>采用<strong>非聚簇索引</strong>，索引文件的数据域存储指向数据文件的指针。辅索引与主索引基本一致，但是辅索引不用保证唯一性。</li>
+</ul>
+<a id="more"></a>
+
+<h4 id="InnoDB："><a href="#InnoDB：" class="headerlink" title="InnoDB："></a>InnoDB：</h4><p>（MySQL默认）</p>
+<ul>
+<li>支持ACID的<strong>事务</strong>，支持事务的四种隔离级别；</li>
+<li>支持行级锁及外键约束：因此可以支持写并发；</li>
+<li>不存储总行数；</li>
+<li>一个InnoDb引擎存储在一个文件空间（共享表空间，表大小不受操作系统控制，一个表可能分布在多个文件里），也有可能为多个（设置为独立表空，表大小受操作系统文件大小限制，一般为2G），受操作系统文件大小的限制；</li>
+<li>主键索引采用<strong>聚簇索引</strong>（索引的数据域存储数据文件本身），辅索引的数据域存储主键的值；因此从辅索引查找数据，需要先通过辅索引找到主键值，再访问辅索引；最好使用自增主键，防止插入数据时，为维持B+树结构，文件的大调整。</li>
+</ul>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>大声的博客，清晰透彻<br>B树、B+树的原理与运用：<a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">MySQL索引背后的数据结构及算法原理</a></p>
+<hr>
+<p>以下内容转自：<a href="https://blog.csdn.net/sky_zhangfan/article/details/3404950" target="_blank" rel="noopener">索引原理与优缺点</a></p>
+<h4 id="1-为什么要创建索引（优点）？"><a href="#1-为什么要创建索引（优点）？" class="headerlink" title="1. 为什么要创建索引（优点）？"></a>1. 为什么要创建索引（优点）？</h4><p>这是因为，创建索引可以大大提高系统的性能。</p>
+<ul>
+<li>通过创建唯一性索引，可以保证数据库表中每一行数据的唯一性。</li>
+<li>可以大大加快数据的检索速度，这也是创建索引的<strong>最主要</strong>的原因。</li>
+<li>可以加速表和表之间的连接，特别是在实现数据的参考完整性方面特别有意义。</li>
+<li>在使用分组和排序子句进行数据检索时，同样可以显著减少查询中分组和排序的时间。</li>
+<li>通过使用索引，可以在查询的过程中，使用优化隐藏器，提高系统的性能。</li>
+</ul>
+<h4 id="2-建立索引的不利因素（缺点）"><a href="#2-建立索引的不利因素（缺点）" class="headerlink" title="2. 建立索引的不利因素（缺点）"></a>2. 建立索引的不利因素（缺点）</h4><ul>
+<li>创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</li>
+<li>索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</li>
+<li>当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。 </li>
+</ul>
+<h4 id="3-创建方向索引的准则"><a href="#3-创建方向索引的准则" class="headerlink" title="3.创建方向索引的准则"></a>3.创建方向索引的准则</h4><p><strong>应该</strong>创建索引的列:</p>
+<ul>
+<li>在经常需要搜索的列上，可以加快搜索的速度；</li>
+<li>在作为<strong>主键</strong>的列上，强制该列的唯一性和组织表中数据的排列结构；</li>
+<li>在经常用在<strong>连接</strong>的列上，这些列主要是一些外键，可以加快连接的速度；</li>
+<li>在经常需要<strong>根据范围进行搜索</strong>的列上创建索引，因为索引已经排序，其指定的范围是连续的；</li>
+<li>在经常<strong>需要排序</strong>的列上创建索引，因为索引已经排序，这样查询可以利用索引的排序，加快排序查询时间；</li>
+<li>在经常<strong>使用在WHERE子句</strong>中的列上面创建索引，加快条件的判断速度。 </li>
+</ul>
+<p><strong>不应该</strong>创建索引的列：</p>
+<ul>
+<li>对于那些在查询中<strong>很少使用</strong>或者参考的列不应该创建索引。这是因为，既然这些列很少使用到，因此有索引或者无索引，并不能提高查询速度。相反，由于增加了索引，反而降低了系统的维护速度和增大了空间需求。</li>
+<li>对于那些只有<strong>很少数据值</strong>的列也不应该增加索引。这是因为，由于这些列的取值很少，例如人事表的性别列，在查询的结果中，结果集的数据行占了表中数据行的很大比例，即需要在表中搜索的数据行的比例很大。增加索引，并不能明显加快检索速度。</li>
+<li>对于那些定义为<strong>text, image和bit</strong>数据类型的列不应该增加索引。这是因为，这些列的数据量要么相当大，要么取值很少。</li>
+<li>当<strong>修改性能远远大于检索性能</strong>时，不应该创建索引。这是因为，修改性能和检索性能是互相矛盾的。当增加索引时，会提高检索性能，但是会降低修改性能。当减少 索引时，会提高修改性能，降低检索性能。因此，当修改性能远远大于检索性能时，不应该创建索引。 </li>
+</ul>
+<h4 id="4-创建索引的方法"><a href="#4-创建索引的方法" class="headerlink" title="4.创建索引的方法"></a>4.创建索引的方法</h4><ul>
+<li><strong>直接</strong>创建索引<br>例如使用CREATE INDEX语句或者使用创建索引向导。</li>
+<li><strong>间接</strong>创建索引<br>例如在表中定义主键约束或者唯一性键约束时，同时也创建了索引。</li>
+</ul>
+<p>虽然，这两种方法都可以创建索引，但是，它们创建索引的具体内容是有区别的。<br>使 用CREATE INDEX语句或者使用创建索引向导来创建索引，这是最基本的索引创建方式，并且这种方法最具有柔性，可以定制创建出符合自己需要的索引。在使用这种方式 创建索引时，可以使用许多选项，例如指定数据页的充满度、进行排序、整理统计信息等，这样可以优化索引。使用这种方法，可以指定索引的类型、唯一性和复合 性，也就是说，既可以创建<strong>聚簇索引</strong>，也可以创建<strong>非聚簇</strong>索引，既可以在<strong>一个列上</strong>创建索引，也可以在<strong>两个或者两个以上的列</strong>上创建索引。 </p>
+<p>通过定义<strong>主键约束</strong>或者<strong>唯一性键约束</strong>，也可以间接创建索引。主键约束是一种保持数据完整性的逻辑，它限制表中的记录有相同的主键记录。在创建主键约束时，系统自动创建 了一个唯一性的聚簇索引。虽然，在逻辑上，主键约束是一种重要的结构，但是，在物理结构上，与主键约束相对应的结构是唯一性的聚簇索引。换句话说，在物理 实现上，不存在主键约束，而只存在唯一性的聚簇索引。同样，在创建唯一性键约束时，也同时创建了索引，这种索引则是唯一性的非聚簇索引。因此，当使用约束 创建索引时，索引的类型和特征基本上都已经确定了，由用户定制的余地比较小。<br>当在表上定义主键或者唯一性键约束时，如果表中已经有了使用 CREATE INDEX语句创建的标准索引时，那么主键约束或者唯一性键约束创建的索引覆盖以前创建的标准索引。也就是说，主键约束或者唯一性键约束创建的索引的优先 级高于使用CREATE INDEX语句创建的索引。</p>
+<h4 id="5-索引的特征"><a href="#5-索引的特征" class="headerlink" title="5.索引的特征"></a>5.索引的特征</h4><p><strong>唯一性索引</strong><br>保证在索引列中的全部数据是唯一的，不会包含冗余数据。<br>如果表中已经有一个主键约束或者唯一性键约束，那么当创建表或者修改表时，SQL Server自动创建一个唯一性索引。然而，如果必须保证唯一性，那么应该创建主键约束或者唯一性键约束，而不是创建一个唯一性索引。当创建唯一性索引 时，应该认真考虑这些规则：当在表中创建主键约束或者唯一性键约束时，SQL Server自动创建一个唯一性索引；如果表中已经包含有数据，那么当创建索引时，SQL Server检查表中已有数据的冗余性；每当使用插入语句插入数据或者使用修改语句修改数据时，SQL Server检查数据的冗余性：如果有冗余值，那么SQL Server取消该语句的执行，并且返回一个错误消息；确保表中的每一行数据都有一个唯一值，这样可以确保每一个实体都可以唯一确认；只能在可以保证实体 完整性的列上创建唯一性索引，例如，不能在人事表中的姓名列上创建唯一性索引，因为人们可以有相同的姓名。 </p>
+<p><strong>复合索引</strong><br>就是一个索引创建在两个列 或者多个列上。<br>在搜索时，当两个或者多个列作为一个关键值时，最好在这些列上创建复合索引。当创建复合索引时，应该考虑这些规则：最多可以把16个列合并 成一个单独的复合索引，构成复合索引的列的总长度不能超过900字节，也就是说复合列的长度不能太长；在复合索引中，所有的列必须来自同一个表中，不能跨 表建立复合列；在复合索引中，列的排列顺序是非常重要的，因此要认真排列列的顺序，原则上，应该首先定义最唯一的列，例如在（COL1，COL2）上的索 引与在（COL2，COL1）上的索引是不相同的，因为两个索引的列的顺序不同；为了使查询优化器使用复合索引，查询语句中的WHERE子句必须参考复合 索引中第一个列；当表中有多个关键列时，复合索引是非常有用的；使用复合索引可以提高查询性能，减少在一个表中所创建的索引数量。 </p>
+<h4 id="6-索引的类型"><a href="#6-索引的类型" class="headerlink" title="6.索引的类型"></a>6.索引的类型</h4><p>根据索引的顺序与数据表的物理顺序是否相同，可以把索引分成两种类型。<br>一种是数据表的物理顺序与索引顺序相同的<strong>聚簇索引</strong>，另一种是数据表的物理顺序与索引顺序不相同的<strong>非聚簇索引</strong>。 </p>
+<h4 id="7-聚簇索引的体系结构"><a href="#7-聚簇索引的体系结构" class="headerlink" title="7.聚簇索引的体系结构"></a>7.聚簇索引的体系结构</h4><p>索引的结构类似于树状结构，树的顶部称为叶级，树的其它部分称为非叶级，树的根部在非叶级中。同样，在聚簇索引中，聚簇索引的叶级和非叶级构成了一个树状结 构，索引的最低级是叶级。在聚簇索引中，表中的数据所在的数据页是叶级，在叶级之上的索引页是非叶级，索引数据所在的索引页是非叶级。在聚簇索引中，数据值的顺序总是按照升序排列。 </p>
+<p>应该在表中经常搜索的列或者按照顺序访问的列上创建聚簇索引。当创建聚簇索引时，应该考虑这些因素：每一个表只能 有一个聚簇索引，因为表中数据的物理顺序只能有一个；表中行的物理顺序和索引中行的物理顺序是相同的，在创建任何非聚簇索引之前创建聚簇索引，这是因为聚 簇索引改变了表中行的物理顺序，数据行按照一定的顺序排列，并且自动维护这个顺序；关键值的唯一性要么使用UNIQUE关键字明确维护，要么由一个内部的 唯一标识符明确维护，这些唯一性标识符是系统自己使用的，用户不能访问；聚簇索引的平均大小大约是数据表的百分之五，但是，实际的聚簇索引的大小常常根据 索引列的大小变化而变化；在索引的创建过程中，SQL Server临时使用当前数据库的磁盘空间，当创建聚簇索引时，需要1.2倍的表空间的大小，因此，一定要保证有足够的空间来创建聚簇索引。 </p>
+<p>当 系统访问表中的数据时，首先确定在相应的列上是否存在有索引和该索引是否对要检索的数据有意义。如果索引存在并且该索引非常有意义，那么系统使用该索引访 问表中的记录。系统从索引开始浏览到数据，索引浏览则从树状索引的根部开始。从根部开始，搜索值与每一个关键值相比较，确定搜索值是否大于或者等于关键 值。这一步重复进行，直到碰上一个比搜索值大的关键值，或者该搜索值大于或者等于索引页上所有的关键值为止。 </p>
+<h4 id="8-非聚簇索引的体系结构"><a href="#8-非聚簇索引的体系结构" class="headerlink" title="8.非聚簇索引的体系结构"></a>8.非聚簇索引的体系结构</h4><p>非聚簇索引的结构也是树状结构，与聚簇索引的结构非常类似，但是也有明显的不同。<br>在非聚簇索引中，叶级仅包含关键值，而没有包含数据行。非聚簇索引表示行的逻辑顺序。</p>
+<p>非聚簇索引有两种体系结构：一种体系结构是在没有聚簇索引的表上创建非聚簇索引，另一种体系结构是在有聚簇索引的表上创建非聚簇索引。 </p>
+<p>如果一个数据表中没有聚簇索引，那么这个数据表也称为数据堆。当非聚簇索引在数据堆的顶部创建时，系统使用索引页中的行标识符指向数据页中的记录。行标识符 存储了数据所在位置的信息。数据堆是通过使用索引分配图（IAM）页来维护的。IAM页包含了数据堆所在簇的存储信息。在系统表sysindexes中， 有一个指针指向了与数据堆相关的第一个IAM页。系统使用IAM页在数据堆中浏览和寻找可以插入新的记录行的空间。这些数据页和在这些数据页中的记录没有 任何的顺序并且也没有链接在一起。在这些数据页之间的唯一的连接是IAM中记录的顺序。当在数据堆上创建了非聚簇索引时，叶级中包含了指向数据页的行标识 符。行标识符指定记录行的逻辑顺序，由文件ID、页号和行ID组成。这些行的标识符维持唯一性。非聚簇索引的叶级页的顺序不同于表中数据的物理顺序。这些 关键值在叶级中以升序维持。</p>
+<p>当非聚簇索引创建在有聚簇索引的表上的时候，系统使用索引页中的指向聚簇索引的聚簇键。聚簇键存储了数据的位置信 息。如果某一个表有聚簇索引，那么非聚簇索引的叶级包含了映射到聚簇键的聚簇键值，而不是映射到物理的行标识符。当系统访问有非聚簇索引的表中数据时，并 且这种非聚簇索引创建在聚簇索引上，那么它首先从非聚簇索引来找到指向聚簇索引的指针，然后通过使用聚簇索引来找到数据。<br>当需要以多种方式检索数据时，非聚簇索引是非常有用的。当创建非聚簇索引时，要考虑这些情况：在缺省情况下，所创建的索引是非聚簇索引；在每一个表上面，可以创建不多于249个非聚簇索引，而聚簇索引最多只能有一个。<br>系统如何访问表中的数据 </p>
+<p>一 般地，系统访问数据库中的数据，可以使用两种方法：<strong>表扫描</strong>和<strong>索引查找</strong>。</p>
+<p>第一种方法是<strong>表扫描</strong>，就是指系统将指针放置在该表的表头数据所在的数据页上，然后按 照数据页的排列顺序，一页一页地从前向后扫描该表数据所占有的全部数据页，直至扫描完表中的全部记录。在扫描时，如果找到符合查询条件的记录，那么就将这 条记录挑选出来。最后，将全部挑选出来符合查询语句条件的记录显示出来。</p>
+<p>第二种方法是使用<strong>索引查找</strong>。索引是一种树状结构，其中存储了关键字和指向包含关键 字所在记录的数据页的指针。当使用索引查找时，系统沿着索引的树状结构，根据索引中关键字和指针，找到符合查询条件的的记录。最后，将全部查找到的符合查 询语句条件的记录显示出来。 </p>
+<p> 在SQL Server中，当访问数据库中的数据时，由SQL Server确定该表中是否有索引存在。如果没有索引，那么SQL Server使用表扫描的方法访问数据库中的数据。查询处理器根据分布的统计信息生成该查询语句的优化执行规划，以提高访问数据的效率为目标，确定是使用 表扫描还是使用索引。</p>
+<h4 id="9-索引的选项"><a href="#9-索引的选项" class="headerlink" title="9.索引的选项"></a>9.索引的选项</h4><p>在创建索引时，可以指定一些选项，通过使用这些选项，可以优化索引的性能。这些选项包括FILLFACTOR选项、PAD_INDEX选项和SORTED_DATA_REORG选项。 </p>
+<p>使 用FILLFACTOR选项，可以优化插入语句和修改语句的性能。当某个索引页变满时，SQL Server必须花费时间分解该页，以便为新的记录行腾出空间。使用FILLFACTOR选项，就是在叶级索引页上分配一定百分比的自由空间，以便减少页 的分解时间。当在有数据的表中创建索引时，可以使用FILLFACTOR选项指定每一个叶级索引节点的填充的百分比。缺省值是0，该数值等价于100。在 创建索引的时候，内部索引节点总是留有了一定的空间，这个空间足够容纳一个或者两个表中的记录。在没有数据的表中，当创建索引的时候，不要使用该选项，因 为这时该选项是没有实际意义的。另外，该选项的数值在创建时指定以后，不能动态地得到维护，因此，只应该在有数据的表中创建索引时才使用。 </p>
+<p>PAD_INDEX 选项将FILLFACTOR选项的数值同样也用于内部的索引节点，使内部的索引节点的填充度与叶级索引的节点中的填充度相同。如果没有指定 FILLFACTOR选项，那么单独指定PAD_INDEX选项是没有实际意义的，这是因为PAD_INDEX选项的取值是由FILLFACTOR选项的 取值确定的。 </p>
+<p>当创建聚簇索引时，SORTED_DATA_REORG选项清除排序，因此可以减少建立聚簇索引所需要的时间。当在一个已经变成 碎块的表上创建或者重建聚簇索引时，使用SORTED_DATA_REORG选项可以压缩数据页。当重新需要在索引上应用填充度时，也使用该选项。当使用SORTED_DATA_REORG选项时，应该考虑这些因素：SQL Server确认每一个关键值是否比前一个关键值高，如果都不高，那么不能创建索引；SQL Server要求1.2倍的表空间来物理地重新组织数据；使用SORTED_DATA_REORG选项，通过清除排序进程而加快索引创建进程；从表中物理 地拷贝数据；当某一个行被删除时，其所占的空间可以重新利用；创建全部非聚簇索引；如果希望把叶级页填充到一定的百分比，可以同时使用 FILLFACTOR选项和SORTED_DATA_REORG选项。 </p>
+<h4 id="10-索引的维护"><a href="#10-索引的维护" class="headerlink" title="10.索引的维护"></a>10.索引的维护</h4><p>为了维护系统性能，索引在创建之后，由于频繁地对数据进行增加、删除、修改等操作使得索引页发生碎块，因此，必须对索引进行维护。 </p>
+<p>使 用DBCC SHOWCONTIG语句，可以显示表的数据和索引的碎块信息。当执行DBCC SHOWCONTIG语句时，SQL Server浏览叶级上的整个索引页，来确定表或者指定的索引是否严重碎块。DBCC SHOWCONTIG语句还能确定数据页和索引页是否已经满了。当对表进行大量的修改或者增加大量的数据之后，或者表的查询非常慢时，应该在这些表上执行 DBCC SHOWCONTIG语句。当执行DBCC SHOWCONTIG语句时，应该考虑这些因素：当执行DBCC SHOWCONTIG语句时，SQL Server要求指定表的ID号或者索引的ID号，表的ID号或者索引的ID号可以从系统表sysindexes中得到；应该确定多长时间使用一次 DBCC SHOWCONTIG语句，这个时间长度要根据表的活动情况来定，每天、每周或者每月都可以。</p>
+<p>使用DBCC DBREINDEX语句重建表的一个或者多个索引。当希望重建索引和当表上有主键约束或者唯一性键约束时，执行DBCC DBREINDEX语句。除此之外，执行DBCC DBREINDEX语句还可以重新组织叶级索引页的存储空间、删除碎块和重新计算索引统计。当使用执行DBCC DBREINDEX语句时，应该考虑这些因素：根据指定的填充度，系统重新填充每一个叶级页；使用DBCC DBREINDEX语句重建主键约束或者唯一性键约束的索引；使用SORTED_DATA_REORG选项可以更快地创建聚簇索引，如果没有排列关键值， 那么不能使用DBCC DBREINDEX语句；DBCC DBREINDEX语句不支持系统表。另外，还可以使用数据库维护规划向导自动地进行重建索引的进程。 </p>
+<p>统计信息是存储在SQL Server中的列数据的样本。这些数据一般地用于索引列，但是还可以为非索引列创建统计。SQL Server维护某一个索引关键值的分布统计信息，并且使用这些统计信息来确定在查询进程中哪一个索引是有用的。查询的优化依赖于这些统计信息的分布准确 度。查询优化器使用这些数据样本来决定是使用表扫描还是使用索引。当表中数据发生变化时，SQL Server周期性地自动修改统计信息。索引统计被自动地修改，索引中的关键值显著变化。统计信息修改的频率由索引中的数据量和数据改变量确定。例如，如 果表中有10000行数据，1000行数据修改了，那么统计信息可能需要修改。然而，如果只有50行记录修改了，那么仍然保持当前的统计信息。除了系统自 动修改之外，用户还可以通过执行UPDATE STATISTICS语句或者sp_updatestats系统存储过程来手工修改统计信息。使用UPDATE STATISTICS语句既可以修改表中的全部索引，也可以修改指定的索引。 </p>
+<p>使用SHOWPLAN和STATISTICS IO语句可以分析索引和查询性能。使用这些语句可以更好地调整查询和索引。SHOWPLAN语句显示在连接表中使用的查询优化器的每一步以及表明使用哪一 个索引访问数据。使用SHOWPLAN语句可以查看指定查询的查询规划。当使用SHOWPLAN语句时，应该考虑这些因素。SET SHOWPLAN_ALL语句返回的输出结果比SET SHOWPLAN_TEXT语句返回的输出结果详细。然而，应用程序必须能够处理SET SHOWPLAN_ALL语句返回的输出结果。SHOWPLAN语句生成的信息只能针对一个会话。如果重新连接SQL Server，那么必须重新执行SHOWPLAN语句。STATISTICS IO语句表明输入输出的数量，这些输入输出用来返回结果集和显示指定查询的逻辑的和物理的I/O的信息。可以使用这些信息来确定是否应该重写查询语句或者 重新设计索引。使用STATISTICS IO语句可以查看用来处理指定查询的I/O信息。</p>
+<p>就象SHOWPLAN语句一样，优化器隐藏也用来 调整查询性能。优化器隐藏可以对查询性能提供较小的改进，并且如果索引策略发生了改变，那么这种优化器隐藏就毫无用处了。因此，限制使用优化器隐藏，这是 因为优化器隐藏更有效率和更有柔性。当使用优化器隐藏时，考虑这些规则：指定索引名称、当index_id为0时为使用表扫描、当index_id为1时 为使用聚簇索引；优化器隐藏覆盖查询优化器，如果数据或者环境发生了变化，那么必须修改优化器隐藏。 </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%B4%A2%E5%BC%95/" rel="tag"># 索引</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/" rel="prev" title="数据库事务与隔离等级">
+      <i class="fa fa-chevron-left"></i> 数据库事务与隔离等级
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%96%87%E4%BB%B6%E5%A4%87%E4%BB%BD/" rel="next" title="数据库与文件备份">
+      数据库与文件备份 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库引擎"><span class="nav-number">1.</span> <span class="nav-text">数据库引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MyISAM："><span class="nav-number">1.1.</span> <span class="nav-text">MyISAM：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#InnoDB："><span class="nav-number">1.2.</span> <span class="nav-text">InnoDB：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引"><span class="nav-number">2.</span> <span class="nav-text">索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-为什么要创建索引（优点）？"><span class="nav-number">2.1.</span> <span class="nav-text">1. 为什么要创建索引（优点）？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-建立索引的不利因素（缺点）"><span class="nav-number">2.2.</span> <span class="nav-text">2. 建立索引的不利因素（缺点）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-创建方向索引的准则"><span class="nav-number">2.3.</span> <span class="nav-text">3.创建方向索引的准则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-创建索引的方法"><span class="nav-number">2.4.</span> <span class="nav-text">4.创建索引的方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-索引的特征"><span class="nav-number">2.5.</span> <span class="nav-text">5.索引的特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-索引的类型"><span class="nav-number">2.6.</span> <span class="nav-text">6.索引的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-聚簇索引的体系结构"><span class="nav-number">2.7.</span> <span class="nav-text">7.聚簇索引的体系结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-非聚簇索引的体系结构"><span class="nav-number">2.8.</span> <span class="nav-text">8.非聚簇索引的体系结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-索引的选项"><span class="nav-number">2.9.</span> <span class="nav-text">9.索引的选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-索引的维护"><span class="nav-number">2.10.</span> <span class="nav-text">10.索引的维护</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sevenhzhang"
+      src="/images/tencent.jpg">
+  <p class="site-author-name" itemprop="name">Sevenhzhang</p>
+  <div class="site-description" itemprop="description">九层之台，起于累土</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/zh805" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;zh805" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:771662863@qq.com" title="E-Mail → mailto:771662863@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/weixin_39554266" title="csdn → https:&#x2F;&#x2F;blog.csdn.net&#x2F;weixin_39554266" rel="noopener" target="_blank"><i class="fa fa-fw fa-crosshairs"></i>csdn</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sevenhzhang</span>
+</div><script color="0,0,255" opacity="0.5" zIndex="-1" count="99" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@1/dist/canvas-nest.js"></script>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.getAttribute('pjax') !== null) {
+      script.setAttribute('pjax', '');
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>

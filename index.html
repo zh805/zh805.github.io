@@ -168,6 +168,234 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%96%87%E4%BB%B6%E5%A4%87%E4%BB%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%96%87%E4%BB%B6%E5%A4%87%E4%BB%BD/" class="post-title-link" itemprop="url">数据库与文件备份</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:35:00 / 修改时间：23:35:47" itemprop="dateCreated datePublished" datetime="2020-03-01T23:35:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <a id="more"></a>
+
+<figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">rem auther:zhanghui</span></span><br><span class="line"><span class="comment">rem date:20181122</span></span><br><span class="line"><span class="comment">rem ******MySQL backup start********</span></span><br><span class="line">@<span class="built_in">echo</span> off</span><br><span class="line"><span class="comment">rem forfiles /p "G:\bupt_backup" /m backup_*.sql -d -30 /c "cmd /c del /f @path"</span></span><br><span class="line"><span class="comment">rem forfiles 用来对备份目录下的过期备份进行删除。</span></span><br><span class="line"><span class="comment">rem “E:\mysql\MySQL BackUp”是备份文件所在的路径，可以自行修改。</span></span><br><span class="line"><span class="comment">rem “backup_*.sql”指的是该路径下所有以“backup_”开头，以“.sql”作为后缀的数据库备份文件。</span></span><br><span class="line"><span class="comment">rem 而后面的数字“30”表示30天过期。</span></span><br><span class="line"></span><br><span class="line">robocopy G:\APUE G:\backup-test /E /R:<span class="number">5</span> /W:<span class="number">60</span> /LOG+:G:\backup-test\copyLog.txt</span><br><span class="line"><span class="comment">rem 路径前者为需要备份的文件路径，后者为备份路径。</span></span><br><span class="line"><span class="comment">rem /E  表示复制子目录，包括空的子目录（不设置这个就只复制当前文件夹文件不复制子文件夹）</span></span><br><span class="line"><span class="comment">rem /MAXAGE:2 表示最长的文件存在时间，排除早于2天的文件（没有这个就是全部复制）</span></span><br><span class="line"><span class="comment">rem /W:n :: 两次重试间的等待时间: 默认为 30 秒。</span></span><br><span class="line"><span class="comment">rem /R:5 表示失败副本的重试次数（建议要设，默认值为一百万 = =）</span></span><br><span class="line"><span class="comment">rem /LOG+:D\xxx.txt  将状态输出到日志文件（附加到现有日志中）</span></span><br><span class="line"><span class="comment">rem 更多用法可在cmd中输入：help robocopy查看</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> "Ymd=<span class="variable">%date:~0,4%</span><span class="variable">%date:~5,2%</span><span class="variable">%date:~8,2%</span><span class="number">0</span><span class="variable">%time:~1,1%</span><span class="variable">%time:~3,2%</span><span class="variable">%time:~6,2%</span>"</span><br><span class="line"><span class="comment">rem 使用set命令来定义一个名为“Ymd”的变量，这个变量的值就是后面的一大串规则，简单说就是当前的日期和时间</span></span><br><span class="line"><span class="function">E:\<span class="title">Software_work</span>\<span class="title">xampp</span>\<span class="title">mysql</span>\<span class="title">bin</span>\<span class="title">mysqldump</span> --<span class="title">opt</span> --<span class="title">single</span>-<span class="title">transaction</span>=<span class="title">TRUE</span> --<span class="title">user</span>=<span class="title">root</span> --<span class="title">password</span>=<span class="title">root</span> --<span class="title">host</span>=127.0.0.1 --<span class="title">protocol</span>=<span class="title">tcp</span> --<span class="title">port</span>=3306 --<span class="title">default</span>-<span class="title">character</span>-<span class="title">set</span>=<span class="title">utf8</span> --<span class="title">single</span>-<span class="title">transaction</span>=<span class="title">TRUE</span> --<span class="title">routines</span> --<span class="title">events</span> "<span class="title">bupt</span>" &gt; "<span class="title">G</span>:\<span class="title">bupt_backup</span>\<span class="title">backup_</span>%<span class="title">Ymd</span>%.<span class="title">sql</span>"</span></span><br><span class="line"><span class="function"><span class="title">rem</span> @<span class="title">echo</span> <span class="title">on</span></span></span><br><span class="line"><span class="function"><span class="title">rem</span> ******<span class="title">MySQL</span> <span class="title">backup</span> <span class="title">end</span>********</span></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/" class="post-title-link" itemprop="url">数据库引擎与索引</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:33:00 / 修改时间：23:34:21" itemprop="dateCreated datePublished" datetime="2020-03-01T23:33:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="数据库引擎"><a href="#数据库引擎" class="headerlink" title="数据库引擎"></a>数据库引擎</h3><h4 id="MyISAM："><a href="#MyISAM：" class="headerlink" title="MyISAM："></a>MyISAM：</h4><ul>
+<li>不支持事务，但是每次查询都是原子的；</li>
+<li>支持表级锁，即每次操作是对整个表加锁；</li>
+<li>存储表的总行数；</li>
+<li>一个MYISAM表有三个文件：索引文件、表结构文件、数据文件；</li>
+<li>采用<strong>非聚簇索引</strong>，索引文件的数据域存储指向数据文件的指针。辅索引与主索引基本一致，但是辅索引不用保证唯一性。</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E4%B8%8E%E7%B4%A2%E5%BC%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/" class="post-title-link" itemprop="url">数据库事务与隔离等级</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:32:00 / 修改时间：23:33:20" itemprop="dateCreated datePublished" datetime="2020-03-01T23:32:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>事务指的是满足 ACID 特性的一组操作，可以通过 Commit 提交一个事务，也可以使用 Rollback 进行回滚。</p>
+<h3 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h3><h4 id="1-原子性（Atomicity）"><a href="#1-原子性（Atomicity）" class="headerlink" title="1.原子性（Atomicity）"></a>1.原子性（Atomicity）</h4><p>事务被视为不可分割的最小单元，事务的所有操作要么全部提交成功，要么全部失败回滚。回滚可以用回滚日志来实现，回滚日志记录着事务所执行的修改操作，在回滚时反向执行这些修改操作即可。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -482,86 +710,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/" class="post-title-link" itemprop="url">二叉树遍历</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 23:13:00 / 修改时间：23:15:07" itemprop="dateCreated datePublished" datetime="2020-03-01T23:13:00+08:00">2020-03-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><a href="https://blog.csdn.net/hackbuteer1/article/details/6583988" target="_blank" rel="noopener">二叉树遍历</a></p>
-<p>二叉树结构</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">BiTree</span>&#123;</span></span><br><span class="line">	<span class="keyword">int</span>	data;</span><br><span class="line">	BiTree* lchild;</span><br><span class="line">	BiTree* rchild;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>先序遍历</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(root == <span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt; root-&gt;data &lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	PreOrder(root -&gt; lchild);</span><br><span class="line">	PreOrder(root -&gt; right);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment">二叉树的非递归前序遍历，前序遍历思想：先让根进栈，只要栈不为空，就可以做弹出操作， </span></span><br><span class="line"><span class="comment">每次弹出一个结点，记得把它的左右结点都进栈，记得右子树先进栈，这样可以保证右子树在栈中总处于左子树的下面。 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder_Nonrecursive</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!root)</span><br><span class="line">		<span class="keyword">return</span> ;</span><br><span class="line">	<span class="built_in">stack</span>&lt;BiTree&gt; s;</span><br><span class="line">	s.push(root);</span><br><span class="line">	<span class="keyword">while</span>(!s.empty())&#123;</span><br><span class="line">		BiTree* temp = s.top();</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; temp-&gt;data &lt;&lt;<span class="string">" "</span>;</span><br><span class="line">		s.pop();</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;rchild)</span><br><span class="line">			s.push(temp-&gt;rchild);</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;lchild)</span><br><span class="line">			s.push(temp-&gt;lchild);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -615,6 +763,86 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/" class="post-title-link" itemprop="url">二叉树遍历</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:13:00 / 修改时间：23:17:34" itemprop="dateCreated datePublished" datetime="2020-03-01T23:13:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><a href="https://blog.csdn.net/hackbuteer1/article/details/6583988" target="_blank" rel="noopener">二叉树遍历</a></p>
+<p>二叉树结构</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">BiTree</span>&#123;</span></span><br><span class="line">	<span class="keyword">int</span>	data;</span><br><span class="line">	BiTree* lchild;</span><br><span class="line">	BiTree* rchild;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>先序遍历</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(root == <span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt; root-&gt;data &lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	PreOrder(root -&gt; lchild);</span><br><span class="line">	PreOrder(root -&gt; right);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment">二叉树的非递归前序遍历，前序遍历思想：先让根进栈，只要栈不为空，就可以做弹出操作， </span></span><br><span class="line"><span class="comment">每次弹出一个结点，记得把它的左右结点都进栈，记得右子树先进栈，这样可以保证右子树在栈中总处于左子树的下面。 </span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PreOrder_Nonrecursive</span><span class="params">(BiTree* root)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!root)</span><br><span class="line">		<span class="keyword">return</span> ;</span><br><span class="line">	<span class="built_in">stack</span>&lt;BiTree&gt; s;</span><br><span class="line">	s.push(root);</span><br><span class="line">	<span class="keyword">while</span>(!s.empty())&#123;</span><br><span class="line">		BiTree* temp = s.top();</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; temp-&gt;data &lt;&lt;<span class="string">" "</span>;</span><br><span class="line">		s.pop();</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;rchild)</span><br><span class="line">			s.push(temp-&gt;rchild);</span><br><span class="line">		<span class="keyword">if</span>(temp-&gt;lchild)</span><br><span class="line">			s.push(temp-&gt;lchild);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -866,148 +1094,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%96%87%E4%BB%B6%E5%A4%87%E4%BB%BD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E6%96%87%E4%BB%B6%E5%A4%87%E4%BB%BD/" class="post-title-link" itemprop="url">数据库与文件备份</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 21:54:23 / 修改时间：21:54:34" itemprop="dateCreated datePublished" datetime="2020-03-01T21:54:23+08:00">2020-03-01</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">rem auther:zhanghui</span><br><span class="line">rem date:<span class="number">20181122</span></span><br><span class="line">rem ******MySQL backup start********</span><br><span class="line">@echo off</span><br><span class="line">rem forfiles /p <span class="string">"G:\bupt_backup"</span> /m backup_*.sql -d <span class="number">-30</span> /c <span class="string">"cmd /c del /f @path"</span></span><br><span class="line">rem forfiles 用来对备份目录下的过期备份进行删除。</span><br><span class="line">rem “E:\mysql\MySQL BackUp”是备份文件所在的路径，可以自行修改。</span><br><span class="line">rem “backup_*.sql”指的是该路径下所有以“backup_”开头，以“.sql”作为后缀的数据库备份文件。</span><br><span class="line">rem 而后面的数字“<span class="number">30</span>”表示<span class="number">30</span>天过期。</span><br><span class="line"></span><br><span class="line">robocopy G:\APUE G:\backup-test /E /R:<span class="number">5</span> /W:<span class="number">60</span> /LOG+:G:\backup-test\copyLog.txt</span><br><span class="line">rem 路径前者为需要备份的文件路径，后者为备份路径。</span><br><span class="line">rem /E  表示复制子目录，包括空的子目录（不设置这个就只复制当前文件夹文件不复制子文件夹）</span><br><span class="line">rem /MAXAGE:<span class="number">2</span> 表示最长的文件存在时间，排除早于<span class="number">2</span>天的文件（没有这个就是全部复制）</span><br><span class="line">rem /W:n :: 两次重试间的等待时间: 默认为 <span class="number">30</span> 秒。</span><br><span class="line">rem /R:<span class="number">5</span> 表示失败副本的重试次数（建议要设，默认值为一百万 = =）</span><br><span class="line">rem /LOG+:D\xxx.txt  将状态输出到日志文件（附加到现有日志中）</span><br><span class="line">rem 更多用法可在cmd中输入：help robocopy查看</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> <span class="string">"Ymd=%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%"</span></span><br><span class="line">rem 使用<span class="built_in">set</span>命令来定义一个名为“Ymd”的变量，这个变量的值就是后面的一大串规则，简单说就是当前的日期和时间</span><br><span class="line">E:\Software_work\xampp\mysql\bin\mysqldump --opt --single-transaction=TRUE --user=root --password=root --host=<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> --protocol=tcp --port=<span class="number">3306</span> --<span class="keyword">default</span>-character-<span class="built_in">set</span>=utf8 --single-transaction=TRUE --routines --events <span class="string">"bupt"</span> &gt; <span class="string">"G:\bupt_backup\backup_%Ymd%.sql"</span></span><br><span class="line">rem @echo on</span><br><span class="line">rem ******MySQL backup end********</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%AD%89%E7%BA%A7/" class="post-title-link" itemprop="url">数据库事务与隔离等级</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 21:53:18 / 修改时间：21:53:24" itemprop="dateCreated datePublished" datetime="2020-03-01T21:53:18+08:00">2020-03-01</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>@[TOC]</p>
-<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>事务指的是满足 ACID 特性的一组操作，可以通过 Commit 提交一个事务，也可以使用 Rollback 进行回滚。</p>
-<h3 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h3><h4 id="1-原子性（Atomicity）"><a href="#1-原子性（Atomicity）" class="headerlink" title="1.原子性（Atomicity）"></a>1.原子性（Atomicity）</h4><p>事务被视为不可分割的最小单元，事务的所有操作要么全部提交成功，要么全部失败回滚。回滚可以用回滚日志来实现，回滚日志记录着事务所执行的修改操作，在回滚时反向执行这些修改操作即可。</p>
-<h4 id="2-一致性（Consistency）"><a href="#2-一致性（Consistency）" class="headerlink" title="2.一致性（Consistency）"></a>2.一致性（Consistency）</h4><p>　　一致性是指事务必须使数据库从一个一致性状态变换到另一个一致性状态，也就是说一个事务执行之前和执行之后都必须处于一致性状态。</p>
-<p>　　拿转账来说，假设用户A和用户B两者的钱加起来一共是5000，那么不管A和B之间如何转账，转几次账，事务结束后两个用户的钱相加起来应该还得是5000，这就是事务的一致性。</p>
-<h4 id="3-隔离性（Isolation）"><a href="#3-隔离性（Isolation）" class="headerlink" title="3.隔离性（Isolation）"></a>3.隔离性（Isolation）</h4><p>　　隔离性是当多个用户并发访问数据库时，比如操作同一张表时，数据库为每一个用户开启的事务，不能被其他事务的操作所干扰，多个并发事务之间要相互隔离。</p>
-<p>　　即要达到这么一种效果：对于任意两个并发的事务T1和T2，在事务T1看来，T2要么在T1开始之前就已经结束，要么在T1结束之后才开始，这样每个事务都感觉不到有其他事务在并发地执行。</p>
-<h4 id="4-持久性（Durability）"><a href="#4-持久性（Durability）" class="headerlink" title="4.持久性（Durability）"></a>4.持久性（Durability）</h4><p>　　持久性是指一个事务一旦被提交了，那么对数据库中的数据的改变就是永久性的，即便是在数据库系统遇到故障的情况下也不会丢失提交事务的操作。</p>
-<h3 id="并发一致性问题"><a href="#并发一致性问题" class="headerlink" title="并发一致性问题"></a>并发一致性问题</h3><h4 id="1-脏读"><a href="#1-脏读" class="headerlink" title="1.脏读"></a>1.脏读</h4><p>脏读是指在一个事务处理过程里读取了另一个<strong>未提交</strong>的事务中的数据。</p>
-<p>T1 修改一个数据，T2 随后读取这个数据。如果 T1 撤销了这次修改，那么 T2 读取的数据是脏数据。<br><img src="https://img-blog.csdnimg.cn/20190312094136973.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="脏读"></p>
-<h4 id="2-不可重复读"><a href="#2-不可重复读" class="headerlink" title="2.不可重复读"></a>2.不可重复读</h4><p>不可重复读是指在对于数据库中的某个数据，一个事务范围内多次查询却返回了不同的数据值，这是由于在查询间隔，被另一个事务修改并提交了。</p>
-<p>例如事务T1在读取某一数据，而事务T2立马修改了这个数据并且提交事务给数据库，事务T1再次读取该数据就得到了不同的结果，发送了不可重复读。</p>
-<p>不可重复读和脏读的区别是，脏读是某一事务读取了另一个事务<strong>未提交的脏数据</strong>，而不可重复读则是<strong>读取了前一事务提交的数据</strong>。<br>　　<br><img src="https://img-blog.csdnimg.cn/20190312094424284.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="不可重复读"></p>
-<h4 id="3-幻读"><a href="#3-幻读" class="headerlink" title="3.幻读"></a>3.幻读</h4><p>幻读是事务非独立执行时发生的一种现象。例如事务T1对一个表中所有的行的某个数据项做了从“1”修改为“2”的操作，这时事务T2又对这个表中插入了一行数据项，而这个数据项的数值还是为“1”并且提交给数据库。而操作事务T1的用户如果再查看刚刚修改的数据，会发现还有一行没有修改，其实这行是从事务T2中添加的，就好像产生幻觉一样，这就是发生了幻读。</p>
-<p>幻读和不可重复读都是读取了另一条已经提交的事务（这点就脏读不同），所不同的是<strong>不可重复读查询的都是同一个数据项，而幻读针对的是一批数据整体（比如数据的个数）</strong>。</p>
-<p>T1 读取某个范围的数据，T2 在这个范围内插入新的数据，T1 再次读取这个范围的数据，此时读取的结果和和第一次读取的结果不同。<br><img src="https://img-blog.csdnimg.cn/20190312094939797.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zOTU1NDI2Ng==,size_16,color_FFFFFF,t_70" alt="幻读"></p>
-<h3 id="MySQL隔离级别"><a href="#MySQL隔离级别" class="headerlink" title="MySQL隔离级别"></a>MySQL隔离级别</h3><h4 id="1-Serializable-串行化-：强制事务串行执行。"><a href="#1-Serializable-串行化-：强制事务串行执行。" class="headerlink" title="1. Serializable (串行化)：强制事务串行执行。"></a>1. Serializable (串行化)：强制事务串行执行。</h4><p>  可避免脏读、不可重复读、幻读的发生。</p>
-<h4 id="2-Repeatable-read-可重复读-：保证在同一个事务中多次读取同样数据的结果是一样的"><a href="#2-Repeatable-read-可重复读-：保证在同一个事务中多次读取同样数据的结果是一样的" class="headerlink" title="2. Repeatable read (可重复读)：保证在同一个事务中多次读取同样数据的结果是一样的"></a>2. Repeatable read (可重复读)：保证在同一个事务中多次读取同样数据的结果是一样的</h4><p>可避免脏读、不可重复读的发生。</p>
-<h4 id="3-Read-committed-读已提交-：一个事务只能读取已经提交的事务所做的修改"><a href="#3-Read-committed-读已提交-：一个事务只能读取已经提交的事务所做的修改" class="headerlink" title="3. Read committed (读已提交)：一个事务只能读取已经提交的事务所做的修改"></a>3. Read committed (读已提交)：一个事务只能读取已经提交的事务所做的修改</h4><p>可避免脏读的发生。</p>
-<h4 id="4-Read-uncommitted-读未提交-：事务中的修改，即使没有提交，对其他事务也是可见的"><a href="#4-Read-uncommitted-读未提交-：事务中的修改，即使没有提交，对其他事务也是可见的" class="headerlink" title="4. Read uncommitted (读未提交)：事务中的修改，即使没有提交，对其他事务也是可见的"></a>4. Read uncommitted (读未提交)：事务中的修改，即使没有提交，对其他事务也是可见的</h4><p>最低级别，任何情况都无法保证。</p>
-<p> 隔离级别最高的是Serializable级别，最低的是Read uncommitted级别，级别越高，执行效率就越低。</p>
-<p>像Serializable这样的级别，就是以锁表的方式(类似于Java多线程中的锁)使得其他的线程只能在锁外等待，所以平时选用何种隔离级别应该根据实际情况。</p>
-<p>在<strong>MySQL</strong>数据库中默认的隔离级别为<strong>Repeatable read (可重复读)</strong>。</p>
-<p><strong>Oracle</strong>数据库中，只支持 <strong>Serializable (串行化)</strong> 级别和 <strong>Read committed (读已提交)</strong> 这两种级别，其中默认的为Read committed级别。</p>
-
       
     </div>
 
@@ -1430,20 +1516,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
