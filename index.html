@@ -168,6 +168,182 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/04/26/git%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/26/git%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" class="post-title-link" itemprop="url">git使用指南</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-26 21:30:58" itemprop="dateCreated datePublished" datetime="2020-04-26T21:30:58+08:00">2020-04-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-27 00:10:29" itemprop="dateModified" datetime="2020-04-27T00:10:29+08:00">2020-04-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/GIT/" itemprop="url" rel="index"><span itemprop="name">GIT</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="git命令"><a href="#git命令" class="headerlink" title="git命令"></a>git命令</h2><ul>
+<li><p>初始化一个git目录<code>git init</code> </p>
+</li>
+<li><p>添加单个文件到暂存区 <code>git add &lt;file&gt;</code></p>
+</li>
+<li><p>添加所有文件到暂存区 <code>git add .</code></p>
+</li>
+<li><p>添加文件到本地仓库 <code>git commint -m &lt;message&gt;</code></p>
+</li>
+<li><p>查看git仓库状态 <code>git status</code></p>
+</li>
+<li><p>查看工作区和暂存区的的差异 <code>git diff &lt;file&gt;</code></p>
+</li>
+<li><p>查看暂存区和本地仓库的差异 <code>git diff --cached</code></p>
+</li>
+<li><p>查看工作区和本地仓库的差异 <code>git diff HEAD -- &lt;file&gt;</code></p>
+</li>
+</ul>
+<ul>
+<li><p>场景1：当在工作区修改了某个文件，但还没add，使用<code>git checkou -- &lt;file&gt;</code>可以丢弃修改</p>
+</li>
+<li><p>场景2：当修改了某文件，还add到了暂存区，使用<code>git reset HEAD &lt;file&gt;</code>就回到了场景1继续即可</p>
+</li>
+<li><p>场景3：修改文件并commit到版本库，想撤销本次提交，使用<code>git reset --hard commit_id</code></p>
+</li>
+<li><p>commint_id是由SHA1计算而来，使用十六进制表示。显示从最近到最远的日志 <code>git log</code></p>
+</li>
+<li><p>显示简洁版日志 <code>git log --pretty=online</code></p>
+</li>
+<li><p>显示分支合并图 <code>git log --graph --pretty=oneline --abbrev-commit</code></p>
+</li>
+</ul>
+<p>Git中HEAD表示当前版本，上一版本是HEAD^，上上版本是HEAD^^，往上100个版本是HEAD^100</p>
+<ul>
+<li><p>查看命令历史<code>git reflog</code></p>
+</li>
+<li><p>使用<code>git rm &lt;file&gt;</code>可以删除一个文件,然后commit到版本库即可</p>
+</li>
+</ul>
+<h2 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h2><ul>
+<li><p>生成公钥 <code>ssh-keygen -t rsa -C &quot;771662863@qq.com&quot;</code>，在.ssh目录下生成私钥id_rsa和公钥id_rsa.pub两个文件</p>
+</li>
+<li><p>关联一个远程仓库 <code>git remote add origin git@server-name:path/repo-name.git</code></p>
+</li>
+</ul>
+<h3 id="分支管理"><a href="#分支管理" class="headerlink" title="分支管理"></a>分支管理</h3><ul>
+<li>查看分支 <code>git branch</code></li>
+<li>创建分支 <code>git branch &lt;name&gt;</code></li>
+<li>切换分支 <code>git checkout &lt;name&gt;</code> 或者 <code>git switch &lt;name&gt;</code></li>
+<li>创建+切换分支 <code>git checkout -b &lt;name&gt;</code> 或者 <code>git switch -c &lt;name&gt;</code></li>
+<li>合并某分支到当前分支 <code>git merge &lt;name&gt;</code></li>
+<li>删除分支 <code>git branch -d &lt;name&gt;</code></li>
+<li>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除</li>
+</ul>
+<h3 id="暂存本地修改"><a href="#暂存本地修改" class="headerlink" title="暂存本地修改"></a>暂存本地修改</h3><ul>
+<li><p>当正开发时，需要修复一个线上bug，使用<code>git stash</code>暂存工作现场，然后切换分支去修复，修复完后再<code>git stash pop</code>，可以回到工作现场</p>
+</li>
+<li><p>在master分支修复的bug，想要合并到当前dev分支，可以用<code>git cherry-pick &lt;commit_id&gt;</code>命令，把bug提交的修改“复制”到当前分支，避免重复劳动</p>
+</li>
+</ul>
+<h3 id="多人协作"><a href="#多人协作" class="headerlink" title="多人协作"></a>多人协作</h3><ol>
+<li><p>用<code>git push origin &lt;branch-name&gt;</code>推送自己的修改</p>
+</li>
+<li><p>如果推送失败，则因为远程分支比本地更新，需要先用git pull试图合并</p>
+</li>
+<li><p>如果合并有冲突，则解决冲突，并在本地提交；</p>
+</li>
+<li><p>没有冲突或者解决掉冲突后，再用<code>git push origin &lt;branch-name&gt;</code>推送就能成功</p>
+</li>
+<li><p>如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用<code>git branch --set-upstream-to &lt;branch-name&gt; origin/&lt;branch-name&gt;</code></p>
+</li>
+</ol>
+<ul>
+<li>查看远程库的信息<code>git remote</code></li>
+<li>查看远程库详细信息 <code>git remote -v</code></li>
+<li>在本地创建和远程分支对应的分支，使用<code>git checkout -b &lt;branch-name&gt; origin/&lt;branch-name&gt;</code>，本地和远程分支的名称最好一致</li>
+</ul>
+<h3 id="Rebase"><a href="#Rebase" class="headerlink" title="Rebase"></a>Rebase</h3><ul>
+<li><p><code>git rebase</code>操作可以把本地未push的分叉提交历史整理成直线；rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。</p>
+</li>
+<li><p><code>git pull --rebase</code>pull的同时rebase</p>
+</li>
+</ul>
+<h2 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h2><ul>
+<li><p>命令<code>git tag &lt;tagname&gt;</code>用于新建一个标签，默认为HEAD，也可以指定一个commit id</p>
+</li>
+<li><p>命令<code>git tag -a &lt;tagname&gt; -m &quot;message&quot;</code>可以指定标签信息</p>
+</li>
+<li><p>命令<code>git tag</code>可以查看所有标签</p>
+</li>
+<li><p>命令<code>git push origin &lt;tagname&gt;</code>可以推送一个本地标签；</p>
+</li>
+<li><p>命令<code>git push origin --tags</code>可以推送全部未推送过的本地标签；</p>
+</li>
+<li><p>命令<code>git tag -d &lt;tagname&gt;</code>可以删除一个本地标签；</p>
+</li>
+<li><p>命令<code>git push origin :refs/tags/&lt;tagname&gt;</code>可以删除一个远程标签</p>
+</li>
+</ul>
+<h2 id="GIT相关网站"><a href="#GIT相关网站" class="headerlink" title="GIT相关网站"></a>GIT相关网站</h2><ul>
+<li><a href="https://gitee.com/liaoxuefeng/learn-java/raw/master/teach/git-cheatsheet.pdf" target="_blank" rel="noopener">GIT CHEAT SHEET</a></li>
+<li><a href="https://git-scm.com/" target="_blank" rel="noopener">GIT官网</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/04/17/PythonCookbookChapter-1-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -193,7 +369,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-04-17 11:45:57 / 修改时间：12:22:28" itemprop="dateCreated datePublished" datetime="2020-04-17T11:45:57+08:00">2020-04-17</time>
+              <time title="创建时间：2020-04-17 11:45:57 / 修改时间：12:23:33" itemprop="dateCreated datePublished" datetime="2020-04-17T11:45:57+08:00">2020-04-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -218,6 +394,7 @@
       
           <h2 id="数据结构与算法"><a href="#数据结构与算法" class="headerlink" title="数据结构与算法"></a>数据结构与算法</h2><h3 id="1-1-解压序列赋值给多个变量"><a href="#1-1-解压序列赋值给多个变量" class="headerlink" title="1.1 解压序列赋值给多个变量"></a>1.1 解压序列赋值给多个变量</h3><p>变量数量与序列元素数量一致</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> main</span><br><span class="line">    t = (<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">    a,b = t</span><br></pre></td></tr></table></figure>
+
       
     </div>
 
@@ -936,82 +1113,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/" class="post-title-link" itemprop="url">二叉树的应用</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 23:13:00 / 修改时间：23:14:28" itemprop="dateCreated datePublished" datetime="2020-03-01T23:13:00+08:00">2020-03-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="1-判断两棵二叉树是否相同"><a href="#1-判断两棵二叉树是否相同" class="headerlink" title="1. 判断两棵二叉树是否相同"></a>1. 判断两棵二叉树是否相同</h4><p>情况1：左右子结点不可旋转<br>情况2：左右子结点可旋转</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">is_equal</span><span class="params">(BiTree* node1,BiTree* node2)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(node1==<span class="literal">NULL</span> &amp;&amp; node2==<span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">if</span>( !node1 || !node2)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(node1-&gt;data == node2-&gt;data)</span><br><span class="line">		<span class="keyword">return</span> is_equal(node1-&gt;lchild,node2-&gt;rchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;rchild);</span><br><span class="line">	<span class="keyword">else</span> </span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	若可旋转，return 语句改为</span></span><br><span class="line"><span class="comment">	return (is_equal(node1-&gt;lchild,node2-&gt;lchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;rchild)) || (is_equal(node1-&gt;lchild,node2-&gt;rchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;lchild))</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1069,6 +1170,82 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%81%8D%E5%8E%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tencent.jpg">
+      <meta itemprop="name" content="Sevenhzhang">
+      <meta itemprop="description" content="九层之台，起于累土">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sevenhzhang的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/" class="post-title-link" itemprop="url">二叉树的应用</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:13:00 / 修改时间：23:14:28" itemprop="dateCreated datePublished" datetime="2020-03-01T23:13:00+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">数据结构与算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="1-判断两棵二叉树是否相同"><a href="#1-判断两棵二叉树是否相同" class="headerlink" title="1. 判断两棵二叉树是否相同"></a>1. 判断两棵二叉树是否相同</h4><p>情况1：左右子结点不可旋转<br>情况2：左右子结点可旋转</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">is_equal</span><span class="params">(BiTree* node1,BiTree* node2)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(node1==<span class="literal">NULL</span> &amp;&amp; node2==<span class="literal">NULL</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">if</span>( !node1 || !node2)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(node1-&gt;data == node2-&gt;data)</span><br><span class="line">		<span class="keyword">return</span> is_equal(node1-&gt;lchild,node2-&gt;rchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;rchild);</span><br><span class="line">	<span class="keyword">else</span> </span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	若可旋转，return 语句改为</span></span><br><span class="line"><span class="comment">	return (is_equal(node1-&gt;lchild,node2-&gt;lchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;rchild)) || (is_equal(node1-&gt;lchild,node2-&gt;rchild)&amp;&amp;is_equal(node1-&gt;rchild,node2-&gt;lchild))</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/01/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1320,75 +1497,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://zh805.github.io/2020/03/01/test/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tencent.jpg">
-      <meta itemprop="name" content="Sevenhzhang">
-      <meta itemprop="description" content="九层之台，起于累土">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Sevenhzhang的博客">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/01/test/" class="post-title-link" itemprop="url">test</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-01 10:13:40 / 修改时间：23:43:05" itemprop="dateCreated datePublished" datetime="2020-03-01T10:13:40+08:00">2020-03-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/test/" itemprop="url" rel="index"><span itemprop="name">test</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to Sevenhzhang’s blog</p>
-<p>this is a test</p>
-
       
     </div>
 
